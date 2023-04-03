@@ -1,0 +1,109 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <locale.h>
+#define TAM_MAX 100
+
+
+
+typedef struct {
+    int topo;
+    int items[TAM_MAX];
+} Pilha;
+
+void empilha(Pilha* s, int item) {
+    if (s->topo == TAM_MAX - 1) {
+        printf("Pilha cheia!\n");
+    } else {
+        s->topo++;
+        s->items[s->topo] = item;
+    }
+}
+
+int desempilha(Pilha* s) {
+    if (s->topo == -1) {
+        printf("Pilha vazia!\n");
+        return -1;
+    } else {
+        int item = s->items[s->topo];
+        s->topo--;
+        return item;
+    }
+}
+
+int main(int argc , char* argv[]) {
+
+    setlocale(LC_ALL, "Portuguese");
+    int i ;
+    for (i = 0; i < 3; ++i) {
+        if(i == 0){
+            argv[i]= "ED-2023-1-AT01-DEC2BIN";
+            argc++;
+        }else if(i == 1){
+            argv[i] = "entrada.txt";
+            argc++;
+        }else if (i == 2){
+            argv[i] = "saida.txt";
+            argc++;
+            argc--;
+        }else{
+            printf("Erro nos parâmetros!\n");
+
+        }
+        printf("argv[%d] = %s\n",i,argv[i]);
+
+
+    }
+    printf("Numero de parametros fornecidos: %d\n", argc);
+    if (argc != 3) {
+        printf("Quantidade de parametros invalida\n");
+        return 1;
+    }
+
+    // Abre os arquivos de entrada e saída
+    FILE* arq_entrada = fopen(argv[1], "a");
+    arq_entrada = fopen(argv[1], "r");
+
+    if (arq_entrada == NULL) {
+        printf("Não conseguiu ler o arquivo: %s\n", argv[1]);
+        return 1;
+    }
+
+    FILE* arq_saida = fopen(argv[2], "w");
+    if (arq_saida == NULL) {
+        printf("Não conseguiu ler o arquivo:: %s\n", argv[2]);
+        return 1;
+    }
+
+    // Declara a pilha para armazenar os dígitos binários
+    Pilha num_binarios;
+    num_binarios.topo = -1;
+
+    // Loop para processar cada linha do arquivo de entrada
+    char linha[100];
+    while (fgets(linha, sizeof(linha), arq_entrada)) {
+        int num_decimal = atoi(linha);
+        if(num_decimal == 0){
+            fprintf(arq_saida, "0");
+        }
+        // Conversão decimal para binário
+        while (num_decimal > 0) {
+            int resto = num_decimal % 2;
+            empilha(&num_binarios, resto);
+            num_decimal /= 2;
+
+        }
+
+        // Escreve os dígitos binários no arquivo de saída, em ordem inversa
+        while (num_binarios.topo != -1) {
+            int digito_bin = desempilha(&num_binarios);
+            fprintf(arq_saida, "%d", digito_bin);
+        }
+        fprintf(arq_saida, "\n");
+    }
+
+    // Fecha os arquivos de entrada e saída
+    fclose(arq_entrada);
+    fclose(arq_saida);
+
+    return 0;
+}
